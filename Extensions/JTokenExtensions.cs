@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
-namespace ReservationPerformanceTests.ReservationPerformanceTests
+namespace ReservationPerformanceTests.Extensions
 {
     public static class JTokenExtensions
     {  

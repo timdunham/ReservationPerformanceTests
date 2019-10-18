@@ -19,9 +19,9 @@ namespace ReservationPerformanceTests
             var schedule = new List<ISchedule>
             {    
                 // Add Users over a period of time
-                new AddUsers(totalUsers: 1, usersEvery: 1, seconds: 5),
+                new AddUsers(totalUsers: 5, usersEvery: 1, seconds: 5),
                 // Run for a duration of time
-                new Duration(0.25m),
+                new Duration(15m),
                 // Remove Users over a period of time
                 new RemoveUsers(usersToRemove: 1, usersEvery:2, seconds: 1)
             };
@@ -69,6 +69,5 @@ namespace ReservationPerformanceTests
         {
             request.Headers.Add("Authorization", "ApiKey D8C3928F106596A0C188A5522804ED");
         }
-
     }
 }
