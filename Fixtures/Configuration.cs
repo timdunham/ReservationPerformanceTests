@@ -73,6 +73,9 @@ namespace ReservationPerformanceTests.Fixtures
                 throw new ApplicationException($"Unable to find page {screenOptionCaption}");
             return screen.Value<string>("ID");
         }
-        
+        internal virtual string SessionId()
+        {
+            return _ui.Value<string>("SessionID");
+        }
     }
 }

@@ -33,11 +33,6 @@ namespace ReservationPerformanceTests.Fixtures
             return new StringContent( inputParams, Encoding.UTF8, "application/json");
         }
 
-        private string SessionId()
-        {
-            return _ui.Value<string>("SessionID");
-        }
-
         internal override HttpContent ChangeOption(string screenOptionCaption, string value)
         {
             var screenId = FindScreenId(screenOptionCaption);

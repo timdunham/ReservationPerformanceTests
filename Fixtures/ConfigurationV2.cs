@@ -38,9 +38,9 @@ namespace ReservationPerformanceTests.Fixtures
 
         internal override HttpContent ChangeOption(string screenOptionCaption, string value)
         {
-            var screenId = _ui.FindScreenId(screenOptionCaption);
+            var screenId = FindScreenId(screenOptionCaption);
             return new StringContent($@"{{
-                ""sessionId"": ""{_ui.SessionId()}"",
+                ""sessionId"": ""{SessionId()}"",
                 ""selections"": [
                     {{
                     ""ID"": ""{screenId}"",
@@ -52,7 +52,7 @@ namespace ReservationPerformanceTests.Fixtures
 
         internal override HttpContent GetSessionId()
         {
-            return new StringContent(JsonConvert.SerializeObject(_ui.Value<string>("SessionID")), Encoding.UTF8, "application/json");
+            return new StringContent(JsonConvert.SerializeObject(SessionId()), Encoding.UTF8, "application/json");
         }
     }
 }
