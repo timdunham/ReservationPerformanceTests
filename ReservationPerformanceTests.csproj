@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Zoxive.HttpLoadTesting.Client" Version="0.0.28" />
+    <PackageReference Include="Infor.CPQ.Security.OAuth.Client" Version="2019.7.25.3" />
+    <PackageReference Include="Zoxive.HttpLoadTesting.Client" Version="0.0.29" />
   </ItemGroup>
 
 </Project>

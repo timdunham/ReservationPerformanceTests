@@ -11,7 +11,7 @@ namespace ReservationPerformanceTests.ReservationPerformanceTests
 
         public async Task Execute(IUserLoadTestHttpClient loadLoadTestHttpClient)
         {
-            var test = new Configuration(loadLoadTestHttpClient, "CPQ_DEV", "Default", "Reservation_v2")
+            var test = new ConfigurationV2(loadLoadTestHttpClient, "CPQ_DEV", "Default", "Reservation")
                 .WithIntegrationParameter("ReservationJSON","","string")
                 .WithIntegrationParameter("ReferralSourceCode", "", "string")
                 .WithIntegrationParameter("CallingApp", "", "string")

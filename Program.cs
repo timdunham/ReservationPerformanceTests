@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Infor.CPQ.Security.OAuth.Client.ZeroLegged;
 using ReservationPerformanceTests.ReservationPerformanceTests;
 using Zoxive.HttpLoadTesting.Client;
 using Zoxive.HttpLoadTesting.Framework.Core;
@@ -19,7 +20,8 @@ namespace ReservationPerformanceTests
             var schedule = new List<ISchedule>
             {    
                 // Add Users over a period of time
-                new AddUsers(totalUsers: 5, usersEvery: 1, seconds: 5),
+                new AddUsers(totalUsers: 1, usersEvery: 1, seconds: 1),
+                //new AddUsers(totalUsers: 30, usersEvery: 1, seconds: 15),
                 // Run for a duration of time
                 new Duration(15m),
                 // Remove Users over a period of time
@@ -30,7 +32,8 @@ namespace ReservationPerformanceTests
             // These are the tests each User will run round robin style
             var tests = new List<ILoadTest>
             {
-                new CreateReservation()
+                new CreateReservation(),
+                //new UpdateLocationLocation()
             };
 
             var users = new List<IHttpUser>
@@ -67,7 +70,24 @@ namespace ReservationPerformanceTests
 
         public static void SetHttpRequestHeaders(HttpRequestMessage request)
         {
-            request.Headers.Add("Authorization", "ApiKey D8C3928F106596A0C188A5522804ED");
+            if (request.RequestUri.AbsoluteUri.Contains("DataImport"))
+            {
+                request.SetOAuthHeader(new ZeroLeggedHandlerOptions()
+                {
+                    ConsumerKey = "key",
+                    ConsumerSecret = "secret",
+                    SignatureMethod = Infor.CPQ.Security.OAuth.Common.SignatureMethod.Hmacsha256,
+                    SupportNonceValidation = true,
+                    SupportVersionValidation = true
+                });
+                request.Headers.Add("X-Infor-TenantId", "CPQ_DEV");
+                request.Headers.Add("X-Infor-SecurityRoles", "CPQ-Designer");
+            } 
+            else 
+            {
+                request.Headers.Add("Authorization", "ApiKey D8C3928F106596A0C188A5522804ED");  //needed for v2 engine
+                request.Headers.Add("ApiKey", "D8C3928F106596A0C188A5522804ED");                //needed for v1 engine
+            }
         }
     }
 }

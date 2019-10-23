@@ -20,18 +20,6 @@ namespace ReservationPerformanceTests.Extensions
             return uiData.Value<string>("SessionID");
         }
 
-        public static HttpContent ChangeOption(this JToken uiData, string screenOptionCaption, string value)
-        {
-            var screenId = uiData.FindScreenId(screenOptionCaption);
-            return new StringContent($@"{{
-  ""SessionId"": ""{uiData.SessionId()}"",
-  ""Selections"": [
-    {{
-      ""ID"": ""{screenId}"",
-      ""Value"": ""{value}""
-    }}
-  ]
-}}", Encoding.UTF8, "application/json");
-        }
+
     }
 }

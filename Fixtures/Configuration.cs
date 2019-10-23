@@ -11,14 +11,21 @@ using Zoxive.HttpLoadTesting.Framework.Http.Json;
 
 namespace ReservationPerformanceTests.Fixtures
 {
-    public class Configuration
+    public abstract class Configuration
     {
-        private readonly IUserLoadTestHttpClient _userLoadTestHttpClient;
-        private readonly string _tenant;
-        private readonly string _rulesetNamespace;
-        private readonly string _ruleset;
-        private JToken _ui;
-        private List<string> _integrationParameters = new List<string>();
+        internal readonly IUserLoadTestHttpClient _userLoadTestHttpClient;
+        internal readonly string _tenant;
+        internal readonly string _rulesetNamespace;
+        internal readonly string _ruleset;
+        internal JToken _ui;
+        internal List<string> _integrationParameters = new List<string>();
+        internal abstract string StartConfigurationUrl {get;}
+        internal abstract string ConfigureUrl {get;}
+        internal abstract string FinalizeConfigurationUrl {get;}
+        internal abstract string CancelConfigurationUrl {get;}
+        internal abstract HttpContent GetSessionId();
+        internal abstract HttpContent GetInputParameters();
+        internal abstract HttpContent ChangeOption(string screenOptionCaption, string value);
 
         public Configuration(IUserLoadTestHttpClient userLoadTestHttpClient, string tenant, string rulesetNamespace, string ruleset)
         {
@@ -29,48 +36,43 @@ namespace ReservationPerformanceTests.Fixtures
         }
         public Configuration WithIntegrationParameter(string name, string value, string dataType)
         {
-            _integrationParameters.Add($"{{ \"Name\": \"{name}\", \"SimpleValue\": \"{value}\", \"isNull\": false, \"Type\": \"{dataType}\" }}");
+            var dataTypeNumber = (dataType=="number")? 1 : (dataType=="boolean") ? 2 : 0;
+                
+            _integrationParameters.Add($"{{ \"Name\": \"{name}\", \"SimpleValue\": \"{value}\", \"IsNull\": false, \"Type\": \"{dataTypeNumber}\" }}"); //isNull vs IsNull?
             return this;
         }
         public async Task<Configuration> StartAsync()
         {
-            var result =(await _userLoadTestHttpClient.Post("api/v4/ui/start", GetInputParameters(), null));
+            var result =(await _userLoadTestHttpClient.Post(StartConfigurationUrl, GetInputParameters(), null));
             _ui = result.AsJson();
             return this;
         }
 
         public async Task<Configuration> ConfigureAsync(string caption, string value, string stepName)
         {
-            _ui = (await _userLoadTestHttpClient.Post($"api/v4/ui/configure?s={stepName}", _ui.ChangeOption(caption, value))).AsJson();
+            _ui = (await _userLoadTestHttpClient.Post(ConfigureUrl, ChangeOption(caption, value))).AsJson();
             return this;
         }
         
         public async Task<Configuration> Finalize()
         {
-            var result = await _userLoadTestHttpClient.Post("api/v4/ui/finalize", new StringContent(JsonConvert.SerializeObject(_ui.SessionId()), Encoding.UTF8, "application/json"));
+            var result = await _userLoadTestHttpClient.Post(FinalizeConfigurationUrl, GetSessionId());
             return this;
         }
 
         public async Task<Configuration> Cancel()
         {
-            var result = await _userLoadTestHttpClient.Post("api/v4/ui/cancel", new StringContent(JsonConvert.SerializeObject(_ui.SessionId()), Encoding.UTF8, "application/json"));
+            var result = await _userLoadTestHttpClient.Post(CancelConfigurationUrl, GetSessionId());
             return this;
         }
 
-        private HttpContent GetInputParameters()
+        internal virtual string FindScreenId(string screenOptionCaption)
         {
-            var inputParams = $@"{{
-    ""Application"": {{ ""Instance"": ""{_tenant}"",""Name"": ""{_tenant}"" }},
-    ""Part"": {{ ""Namespace"": ""{_rulesetNamespace}"", ""Name"": ""{_ruleset}""}},
-    ""Mode"": 0,
-    ""Profile"": ""default"",
-    ""HeaderDetail"" : {{ ""HeaderId"": ""Simulator"", ""DetailId"": ""{Guid.NewGuid()}"" }},
-    ""SourceHeaderDetail"" : {{ ""HeaderId"": """", ""DetailId"": """" }},
-    ""VariantKey"" : """",
-    ""IntegrationParameters"" : [{string.Join(',', _integrationParameters)}],
-    ""RapidOptions"" : null
-}}";
-            return new StringContent( inputParams, Encoding.UTF8, "application/json");
+            var screen = _ui.SelectToken($"$...ScreenOptions[?(@.Caption=='{screenOptionCaption}')]");
+            if (screen==null)
+                throw new ApplicationException($"Unable to find page {screenOptionCaption}");
+            return screen.Value<string>("ID");
         }
+        
     }
 }
