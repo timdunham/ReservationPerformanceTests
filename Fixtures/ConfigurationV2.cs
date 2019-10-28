@@ -2,8 +2,6 @@ using System;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ReservationPerformanceTests.Extensions;
 using Zoxive.HttpLoadTesting.Framework.Http;
 
 namespace ReservationPerformanceTests.Fixtures

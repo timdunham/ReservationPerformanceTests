@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ReservationPerformanceTests.Extensions;
 using Zoxive.HttpLoadTesting.Framework.Http;
 using Zoxive.HttpLoadTesting.Framework.Http.Json;
 
@@ -54,6 +52,14 @@ namespace ReservationPerformanceTests.Fixtures
             return this;
         }
         
+        public async Task<Configuration> ConfigureWithRandomOptionAsync(string caption, string[] withoutValues, string stepName)
+        {
+            var value = FindRandomScreenValue(caption, withoutValues);
+            Console.Write($"{value}-");
+            _ui = (await _userLoadTestHttpClient.Post(ConfigureUrl, ChangeOption(caption, value))).AsJson();
+            return this;
+        }
+        
         public async Task<Configuration> Finalize()
         {
             var result = await _userLoadTestHttpClient.Post(FinalizeConfigurationUrl, GetSessionId());
@@ -68,11 +74,26 @@ namespace ReservationPerformanceTests.Fixtures
 
         internal virtual string FindScreenId(string screenOptionCaption)
         {
+            var screen = FindScreen(screenOptionCaption);
+            return screen.Value<string>("ID");
+        }
+
+        internal virtual string FindRandomScreenValue(string screenOptionCaption, IEnumerable<string> withoutValues)
+        {
+            var screen = FindScreen(screenOptionCaption);
+            var selectableValues = screen.SelectToken("SelectableValues").Select(x=>x.Value<string>("Value")).Except(withoutValues).ToArray();
+            var index = new Random().Next(selectableValues.Length);
+            return selectableValues[index];
+        }
+
+        private JToken FindScreen(string screenOptionCaption)
+        {
             var screen = _ui.SelectToken($"$...ScreenOptions[?(@.Caption=='{screenOptionCaption}')]");
             if (screen==null)
                 throw new ApplicationException($"Unable to find page {screenOptionCaption}");
-            return screen.Value<string>("ID");
+            return screen;
         }
+
         internal virtual string SessionId()
         {
             return _ui.Value<string>("SessionID");

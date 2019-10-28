@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using ReservationPerformanceTests.Fixtures;
 using Zoxive.HttpLoadTesting.Framework.Core;
@@ -11,7 +12,7 @@ namespace ReservationPerformanceTests.ReservationPerformanceTests
 
         public async Task Execute(IUserLoadTestHttpClient loadLoadTestHttpClient)
         {
-            var test = new ConfigurationV2(loadLoadTestHttpClient, "CPQ_DEV", "Default", "Reservation")
+            var test = new ConfigurationV1(loadLoadTestHttpClient, "CPQ_DEV", "Default", "Reservation")
                 .WithIntegrationParameter("ReservationJSON","","string")
                 .WithIntegrationParameter("ReferralSourceCode", "", "string")
                 .WithIntegrationParameter("CallingApp", "", "string")
@@ -22,12 +23,15 @@ namespace ReservationPerformanceTests.ReservationPerformanceTests
             try
             {
                 await test.StartAsync();
+                //await test.ConfigureAsync("ReservationLocation<font color=red>*</font>", "SJUT11ZE", "Location");
                 await test.ConfigureAsync("ReservationLocation<font color=red>*</font>", "SJUT11ZE", "Location");
-                await test.ConfigureAsync("VehicleClass<font color=red>*</font>", "CCAR", "Vehicle");    
+                await test.ConfigureWithRandomOptionAsync("VehicleClass<font color=red>*</font>", new []{"ANCONL"}, "Vehicle");
                 await test.Finalize();
+                Console.WriteLine();
             }
             catch (System.Exception)
             {
+                Console.WriteLine($"FAILED");
                 await test.Cancel();
                 //throw e; 
             }

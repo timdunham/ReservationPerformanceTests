@@ -33,7 +33,7 @@ namespace ReservationPerformanceTests
             var tests = new List<ILoadTest>
             {
                 new CreateReservation(),
-                //new UpdateLocationLocation()
+                new UpdateLocationLocation()
             };
 
             var users = new List<IHttpUser>
